@@ -1,0 +1,8 @@
+[ WARNING] | 10 Jun 2020 02:06:12 @     839 | "   ttfaction.py" line 330, in `MainThread` : 尚未绘制内容, 需要先调用draw(str). 用示例内容替换.
+[ WARNING] | 10 Jun 2020 02:07:07 @     845 | "   ttfaction.py" line 330, in `MainThread` : 尚未绘制内容, 需要先调用draw(str). 用示例内容替换.
+[ WARNING] | 10 Jun 2020 02:41:15 @    1475 | "   ttfaction.py" line 206, in `MainThread` : 单行模式暂时只支持10字符以内的文本. 内容`呜汪嗷喵喵喵~
+~~~~~~~~~~`被忽略
+[ WARNING] | 10 Jun 2020 02:41:50 @    1424 | "   ttfaction.py" line 206, in `MainThread` : 单行模式暂时只支持10字符以内的文本. 内容`呜汪嗷喵喵喵~
+	~~~~`被忽略
+[ WARNING] | 10 Jun 2020 02:42:20 @    1423 | "   ttfaction.py" line 206, in `MainThread` : 单行模式暂时只支持10字符以内的文本. 内容`呜汪嗷喵喵喵~
+	~~~~`被忽略
