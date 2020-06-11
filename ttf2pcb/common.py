@@ -8,10 +8,9 @@ import sys
 import win32clipboard as clipboard
 from win32con import *
 import re
-import logging
 import math
-
 import logging
+from geometry import *
 
 # 配置个记录器以便输出和记录相关信息
 logging.addLevelName(11, "TIPS")  # 自定义一个级别, 用于充当注释
@@ -23,12 +22,12 @@ consoleHandle = logging.StreamHandler()
 consoleHandle.setFormatter(screenFormat)
 consoleHandle.setLevel(logging.NOTSET)
 logFile = "./debug.log"
-fileHandle = logging.FileHandler(logFile)
+fileHandle = logging.FileHandler(logFile, encoding="UTF-8")
 fileHandle.setFormatter(fileFormat)
 fileHandle.setLevel(logging.NOTSET)
 
-logALL = logging.getLogger("root")
-logALL.addHandler(fileHandle)
+logRoot = logging.getLogger("root")
+logRoot.addHandler(fileHandle)
 logConsole = logging.getLogger("root.screen")
 logConsole.addHandler(consoleHandle)
 
