@@ -200,10 +200,11 @@ class TTFaction:
         if len(text) > 0:
             source = text
         source = re.sub(r"[^ ^\n\S]", " ", source)  # 不可见的那些特殊符号当成空格处理
+        source = source.replace("\\", "\\\\")
         if not ignoreLimit:
-            if len(source) > 10:
-                source = source[:]
-                logConsole.warning( FutureWarning("单行模式暂时只支持10字符以内的文本. 内容`%s`被忽略" % text[10:]) )
+            if len(source) > 45:
+                source = source[:45]
+                logConsole.warning( FutureWarning("单行模式暂时只支持45字符以内的文本. 内容`%s`被忽略" % text[46:]) )
         elif len(text) == 0:
             logConsole.warning( Warning("输入不能为空. 默认内容为`测试demo`") )
 
@@ -214,9 +215,16 @@ class TTFaction:
         for i, char in enumerate(source):  # 依次绘制每个字符
 
             if char != "\n":  # 换行符直接跳过
-                charName = self.bestcmap[ord(char)]
-                glyph = self.glyphSet[charName]
-                charWidth, charHeight = self.getCharSize(glyph=glyph, scale=scale)
+                try:  # 这个版本暂时没做failedback字体的功能
+                    # TODO: 加上failedback字体
+                    charName = self.bestcmap[ord(char)]
+                    glyph = self.glyphSet[charName]
+                    charWidth, charHeight = self.getCharSize(glyph=glyph, scale=scale)
+                except Exception as e:
+                    logConsole.warning(f"取字`{char}`信息失败: {e}")
+                    charName = self.bestcmap[ord("口")]
+                    glyph = self.glyphSet[charName]
+                    charWidth, charHeight = self.getCharSize(glyph=glyph, scale=scale)
                 if i == 0:
                     self.charPos.append([0, 0])  # 每个字的起始总是上一个字的起始加上(字宽+间距)
                     cursor = [(charWidth * (1+space)), 0]

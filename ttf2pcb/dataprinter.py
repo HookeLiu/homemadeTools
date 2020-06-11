@@ -4,7 +4,7 @@
 import time
 
 import common
-from common import _round, logConsole, logALL, data
+from common import _round, logConsole, logRoot, data
 from ttfaction import TTFaction
 
 from geometry import *
@@ -18,42 +18,42 @@ data_demo.generateData()
 
 class DataPrinter:
 
-    def __init__(self, obj=data_demo, name="demo233", method=None, layers=None, stage=12, **setting):
-        if layers is None:
-            layers = ["F.SilkS"] * len(data)
-        if len(layers) < len(obj):
-            layers += [layers][-1] * (len(obj) - len(layers))
-
-        if method is None:
-            method = ["填充"] * len(data)
-        if len(method) < len(obj):
-            method += [method][-1] * (len(obj) - len(method))
-
+    def __init__(self, obj=data_demo, name="demo233", stage=12, **settings):
         self.name = name
-        self.method = method
-        self.layers = layers
+        self.method = settings.get("绘制模式")
+        self.layers = settings.get("图层名称")
+
+        if self.layers is None:
+            self.layers = ["F.SilkS"] * len(obj)
+        if len(self.layers) < len(obj):
+            self.layers += [str(self.layers[-1])] * (len(obj) - len(self.layers))
+
+        if self.method is None:
+            self.method = ["填充"] * len(obj)
+        if len(self.method) < len(obj):
+            self.method += [str(self.method[-1])] * (len(obj) - len(self.method))
+
         self.dataText = ""
         self.chars = [datum["符号"] for datum in obj]
         self.points_subs = [datum["分段信息"] for datum in obj]
         self.points_coor = [datum["所有顶点"] for datum in obj]
         self.charPosition = [datum["原点位置"] for datum in obj]
         self.stage = stage
-        self.settings = setting
+        self.traceWidth = settings.get("描边厚度")
         # TODO: 还需考虑做上格式检查及转换
 
     def clean(self):
         self.dataText = ""
 
-    def load(self, obj, name="demo233", method=None, layers=None, stage=12, **setting):
+    def load(self, obj, name="demo233", stage=12, **settings):
         self.clean()
-        self.__init__(self, obj, name, method, layers, stage, setting)
+        self.__init__(obj, name, stage, **settings)
 
     def render_KiCAD(self):
         self.clean()
         self.dataText += data['ClipHeader']
         time_gen = common.getHexTime()
         traceCount = 0
-        traceWidth = self.settings.get("描边")
 
         for i in range(len(self.points_subs)):
             # 每一个符号分别处理
@@ -65,8 +65,8 @@ class DataPrinter:
             meth = self.method[i]
 
             if meth.find("描边") > -1:  # 需要描边的话看看有没有指定描边粗细, 没指定的话用字宽度自动计算一个默认值.
-                if traceWidth is None:
-                    traceWidth = [_round(0.001 *
+                if self.traceWidth is None:
+                    self.traceWidth = [_round(0.001 *
                                   ((self.charPosition[i][0] - self.charPosition[i - 1][0]) if i > 0 else self.charPosition[0][0])
                                   * 55)]
                 traceCount += 1
@@ -135,7 +135,7 @@ class DataPrinter:
                                                                           -1 * (points_thisPoly[j][1] + xyOffset[1])
                                                                           )
                         self.dataText += data['Node_footer_polygon'].format(layerName=layer,
-                                                                            stroke_width=traceWidth[(traceCount-1) % len(traceWidth)],
+                                                                            stroke_width=self.traceWidth[(traceCount-1) % len(self.traceWidth)],
                                                                             hexTime=time_gen
                                                                             )
 
@@ -143,3 +143,6 @@ class DataPrinter:
 
     def writeClip(self):
         common.setClip(self.dataText)
+
+    def toText(self):
+        return self.dataText
