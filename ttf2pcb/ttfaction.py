@@ -4,7 +4,7 @@
 import time
 
 import common
-from common import _round, logConsole, logALL
+from common import _round, logConsole
 
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen

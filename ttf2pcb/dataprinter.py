@@ -9,6 +9,8 @@ from ttfaction import TTFaction
 
 from geometry import *
 
+import numpy as np
+
 data_demo = TTFaction("sarasa-monoT-sc-regular.ttf")
 data_demo.draw("喵唔汪?")
 data_demo.generateData()
@@ -16,47 +18,66 @@ data_demo.generateData()
 
 class DataPrinter:
 
-    def __init__(self, obj=data_demo, name="demo233", method="填充", layers=None, stage=12):
+    def __init__(self, obj=data_demo, name="demo233", method=None, layers=None, stage=12, **setting):
         if layers is None:
             layers = ["F.SilkS"] * len(data)
         if len(layers) < len(obj):
-            layers += [layers][-1] * (len(obj)-len(layers))
+            layers += [layers][-1] * (len(obj) - len(layers))
+
+        if method is None:
+            method = ["填充"] * len(data)
+        if len(method) < len(obj):
+            method += [method][-1] * (len(obj) - len(method))
+
         self.name = name
         self.method = method
         self.layers = layers
         self.dataText = ""
-        self.chars        = [datum["符号"] for datum in obj]
-        self.points_subs  = [datum["分段信息"] for datum in obj]
-        self.points_coor  = [datum["所有顶点"] for datum in obj]
+        self.chars = [datum["符号"] for datum in obj]
+        self.points_subs = [datum["分段信息"] for datum in obj]
+        self.points_coor = [datum["所有顶点"] for datum in obj]
         self.charPosition = [datum["原点位置"] for datum in obj]
         self.stage = stage
+        self.settings = setting
         # TODO: 还需考虑做上格式检查及转换
 
     def clean(self):
         self.dataText = ""
 
-    def load(self, obj, name="demo233", method="填充", layers=None, stage=12):
+    def load(self, obj, name="demo233", method=None, layers=None, stage=12, **setting):
         self.clean()
-        self.__init__(self, obj, name, method, layers, stage)
+        self.__init__(self, obj, name, method, layers, stage, setting)
 
-    def render(self):
+    def render_KiCAD(self):
         self.clean()
         self.dataText += data['ClipHeader']
+        time_gen = common.getHexTime()
+        traceCount = 0
+        traceWidth = self.settings.get("描边")
+
         for i in range(len(self.points_subs)):
             # 每一个符号分别处理
             points_subs = self.points_subs[i]
             points = self.points_coor[i]
-            xyOffset = self.charPosition[i][0], -1*self.charPosition[i][1]
+            xyOffset = self.charPosition[i][0], -1 * self.charPosition[i][1]
             layer = self.layers[i]
             char = self.chars[i]
+            meth = self.method[i]
 
-            for grpNum, subs in points_subs.items():
-                if subs[2] and len(subs[3]) % 2 == 0:  # 只处理闭合的多边形(如果是线就不管)
+            if meth.find("描边") > -1:  # 需要描边的话看看有没有指定描边粗细, 没指定的话用字宽度自动计算一个默认值.
+                if traceWidth is None:
+                    traceWidth = [_round(0.001 *
+                                  ((self.charPosition[i][0] - self.charPosition[i - 1][0]) if i > 0 else self.charPosition[0][0])
+                                  * 55)]
+                traceCount += 1
+
+            for grpNum, subs in points_subs.items():  # points_subs:: 分段序号:[分段起点序号,分段终点序号,是否闭合,外围框序号们/内包框序号们]
+                if subs[2] and len(subs[3]) % 2 == 0 and meth.find("填充") > -1:  # 只处理闭合的多边形(如果是线就不管). 如果不需要填充那就直接跳过.
                     if len(subs[4]) == 0:  # 不含"洞"的多边形直接填上输出
                         self.dataText += data['Node_header_polygon']
                         for point in points[subs[0]:subs[1] + 1, 0]:
-                            self.dataText += data['Node_coord_polygon'].format(point[0]+xyOffset[0], -1 * (point[1]+xyOffset[1]))
-                        self.dataText += data['Node_footer_polygon'].format(layerName=layer, stroke_width="0", hexTime=common.getHexTime())
+                            self.dataText += data['Node_coord_polygon'].format(point[0] + xyOffset[0], -1 * (point[1] + xyOffset[1]))
+                        self.dataText += data['Node_footer_polygon'].format(layerName=layer, stroke_width="0", hexTime=time_gen)
                     else:  # 对于含洞的, 只含一个洞的通过调整点序的方法实现"去洞"; 含有多个洞的暂时直接用KiCAD的Zone来挖洞(这样不优, 已经想到了"一笔画"的方法但还没来得及做)
                         # 先数数包含洞的次数以确定是不是真的含有多个洞(如"回"这样有两个框和两个"洞"的图形实际上能拆成两组只含有一个"洞"的)
                         flag_isOutline = False
@@ -82,26 +103,42 @@ class DataPrinter:
 
                             self.dataText += data['Node_header_polygon']
                             for point in points_comb:
-                                self.dataText += data['Node_coord_polygon'].format(point[0]+xyOffset[0], -1 * (point[1]+xyOffset[1]))
-                            self.dataText += data['Node_footer_polygon'].format(layerName=layer, stroke_width="0", hexTime=common.getHexTime())
+                                self.dataText += data['Node_coord_polygon'].format(point[0] + xyOffset[0], -1 * (point[1] + xyOffset[1]))
+                            self.dataText += data['Node_footer_polygon'].format(layerName=layer, stroke_width="0", hexTime=time_gen)
 
                         else:  # 当前版本(0.0.1_alpha)为了方便就直接用KiCad的zone了
+                            # TODO: 待改成"一笔画"的算法. (已经想出了一种递归方法, 但还没做出来... 实际上无论有几个"洞", 通过增加顶点并调整顺序的方法都能得到**看起来**有"洞"的无洞封闭多边形.)
                             outlinePoints = [Point(point[0], point[1]) for point in points[subs[0]:subs[1] + 1, 0]]
                             innerLines = {}
                             for groupNum in subs[4]:
                                 innerLines[groupNum] = points[points_subs[groupNum][0]:points_subs[groupNum][1], 0]
-                            self.dataText += data['Node_header_zone'].format(0, layer, common.getHexTime(), 0.233, self.stage)
+                            self.dataText += data['Node_header_zone'].format(0, layer, time_gen, 0.233, self.stage)
                             self.dataText += data['Node_header_fillPolygon']
                             for point in outlinePoints:
-                                self.dataText += "(xy {} {}) ".format(point.x+xyOffset[0], -1 * (point.y+xyOffset[1]))
+                                self.dataText += "(xy {} {}) ".format(point.x + xyOffset[0], -1 * (point.y + xyOffset[1]))
                             self.dataText += ")\n\t\t)"
 
                             for grpunm, subPoints in innerLines.items():
                                 self.dataText += data['Node_header_fillPolygon']
                                 for point in subPoints:
-                                    self.dataText += "(xy {} {}) ".format(point[0]+xyOffset[0], -1 * (point[1]+xyOffset[1]))
+                                    self.dataText += "(xy {} {}) ".format(point[0] + xyOffset[0], -1 * (point[1] + xyOffset[1]))
                                 self.dataText += ") )"
                             self.dataText += "\n\t)"
+
+                if meth.find("描边") > -1:  # 描边实际上就是把这一个多边形的所有点用线连起来.
+                    points_thisPoly = points[subs[0]:subs[1], 0]
+                    np.append(points_thisPoly, np.array(points_thisPoly[0]))  # 连线要回到起点
+                    for j in range(len(points_thisPoly)):
+                        self.dataText += data['Node_data_segment'].format(points_thisPoly[j-1][0] + xyOffset[0],
+                                                                          -1 * (points_thisPoly[j-1][1] + xyOffset[1]),
+                                                                          points_thisPoly[j][0] + xyOffset[0],
+                                                                          -1 * (points_thisPoly[j][1] + xyOffset[1])
+                                                                          )
+                        self.dataText += data['Node_footer_polygon'].format(layerName=layer,
+                                                                            stroke_width=traceWidth[(traceCount-1) % len(traceWidth)],
+                                                                            hexTime=time_gen
+                                                                            )
+
         self.dataText += data['Clipfooter']
 
     def writeClip(self):
