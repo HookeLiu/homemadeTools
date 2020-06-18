@@ -1,18 +1,15 @@
 """
 自选ttf字体, 将输入的文本内容转换成一系列基础画笔动作(包括把svg的曲线采样为点)
 """
+import re
 import time
 
 import common
-from common import _round, logConsole
-
-from fontTools.ttLib import TTFont
-from fontTools.pens.svgPathPen import SVGPathPen
-
-from geometry import *
-
-import re
 import numpy as np
+from common import _round, logConsole
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.ttLib import TTFont
+from geometry import *
 
 
 def getPolyList(actions, precision=50, pointsType=tuple, returnText=False):
@@ -236,9 +233,14 @@ class TTFaction:
                 cursor[1] += 1  # \n
                 continue
 
-            pen = SVGPathPen(None)
-            glyph.draw(pen)
-            penCommandList = pen._commands
+            try:
+                pen = SVGPathPen(self.glyphSet)  # TODO: 待搞明白: 以前的看的例程都是传参`None`, 但实际使用发现这样会造成少数字符无法绘制的情况, 尚未找到原因.
+                glyph.draw(pen)
+                penCommandList = pen._commands
+            except Exception as e:
+                logConsole.error( f"绘制`{char}`错误: {e}" )
+                print( FutureWarning(f"绘制字符`{char}`时出错({e}), 跳过...") )
+                continue
 
             x_previous = y_previous = 0.0  # 上一步操作的结果记录
             x_current = y_current = 0.0    # 当前正在操作的过程
