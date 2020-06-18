@@ -190,6 +190,10 @@ else:
             if self.userFont is None:
                 logRoot.warning("未选择字体")
                 self.checkFontFile()
+                if self.userFont is None:  # 再尝试一次, 如果还没有能用的字体就取消操作.
+                    # TODO: 增加备选字体
+                    printc( ResourceWarning("没有选择字体文件, 请选择一个常规的ttf字体. 本次操作取消...") )
+                    return -233
             time_start = time.perf_counter()
             self.userFont.draw(self.i_sourceText.toPlainText(),
                                self.setting_scale.value()*1e-2,
