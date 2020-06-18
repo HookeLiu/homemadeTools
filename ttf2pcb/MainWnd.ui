@@ -33,7 +33,7 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>TTF字体绘制工具 V0.0.1alpha</string>
+   <string>TTF字体绘制工具 V0.0.２</string>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>
@@ -255,7 +255,7 @@
           </font>
          </property>
          <property name="text">
-          <string>需要绘制的文本: (纯文本. 本版本暂不支持富文本模式)</string>
+          <string>需要绘制的文本: (纯文本. 本版本暂不支持富文本模式. 留空使用demo文本.)</string>
          </property>
         </widget>
        </item>
@@ -361,16 +361,16 @@
               <string>%</string>
              </property>
              <property name="minimum">
-              <double>0.500000000000000</double>
+              <double>0.050000000000000</double>
              </property>
              <property name="maximum">
-              <double>100.000000000000000</double>
+              <double>233.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.100000000000000</double>
+              <double>0.050000000000000</double>
              </property>
              <property name="value">
-              <double>1.500000000000000</double>
+              <double>0.800000000000000</double>
              </property>
             </widget>
            </item>
@@ -557,7 +557,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'等距更纱黑体 T SC','monospace'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;　　　　　　　---TTF文字绘制工具 V0.0.2---&lt;br /&gt; 　　　如有疑问可咨询QQ 2139223150 欢迎学习交流&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="overwriteMode">
             <bool>false</bool>
@@ -572,7 +572,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QPushButton" name="action_setClipboard">
              <property name="text">
-              <string>写入剪贴板</string>
+              <string>刷新剪贴板</string>
              </property>
             </widget>
            </item>
