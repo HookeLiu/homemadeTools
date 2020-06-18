@@ -13,9 +13,9 @@ DEMO = False  # 如果想查看示例的话就把它改成True
 
 
 text_demo1 = \
-    """雷水聚聚TQL
-awsl\tQwQ\t太强了
-\t\t\t\tWSL0123"""
+    """⚡雷水聚聚TQL
+awsl\tQωQ\t太√⑥了
+\t\tWSL012³³↲"""
 
 text_demo2 = "口口口\n口"
 
@@ -137,7 +137,7 @@ else:
             super().closeEvent(event)
 
         def copyData(self):
-            if len(self.outputBuff) < 10:
+            if len(self.outputBuff) < 55:
                 printc("还没有任何可写入的内容. ")
                 res = setClip("喵喵喵~")
                 if res.find("成功") > -1:
@@ -197,7 +197,7 @@ else:
                                self.setting_space.value()*1e-2)
             renderData = self.userFont.generateData()
             externSetting_text = self.i_externSettings.text()
-            if len(externSetting_text) > 5:
+            if len(externSetting_text) > 8:
                 try:
                     externSettings = json.loads(externSetting_text)
                     if type(externSettings) != dict:
@@ -216,8 +216,7 @@ else:
             if 绘制模式 is None:
                 method = self.setting_method.currentText()
                 if method == "默认":
-                    method == "填充"
-                externSettings["绘制模式"] = [method]
+                    externSettings["绘制模式"] = ["填充"]
             图层名称 = externSettings.get("图层名称")
             if 图层名称 is None:
                 externSettings["图层名称"] = ["F.SilkS"]
