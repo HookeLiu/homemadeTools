@@ -1,24 +1,22 @@
 """
 渲染多边形到KiCAD的PCBnew
 """
-import time
-
-import common
-from common import _round, logConsole, logRoot, data
-from ttfaction import TTFaction
-
-from geometry import *
 
 import numpy as np
 
-data_demo = TTFaction("sarasa-monoT-sc-regular.ttf")
-data_demo.draw("喵唔汪?")
-data_demo.generateData()
+import common
+from common import _round, logConsole, data
+from geometry import *
+
+
+# data_demo = TTFaction("sarasa-monoT-sc-regular.ttf")
+# data_demo.draw("喵唔汪?")
+# data_demo.generateData()
 
 
 class DataPrinter:
 
-    def __init__(self, obj=data_demo, name="demo233", stage=12, **settings):
+    def __init__(self, obj=None, name="demo233", stage=12, **settings):
         self.name = name
         self.method = settings.get("绘制模式")
         self.layers = settings.get("图层名称")
@@ -142,7 +140,14 @@ class DataPrinter:
         self.dataText += data['Clipfooter']
 
     def writeClip(self):
-        common.setClip(self.dataText)
+        if len(self.dataText) > 55:
+            common.setClip(self.dataText)
+        else:
+            if len(self.chars) > 0:
+                logConsole.warning(f"输入了数据但没有生成内容:\n{self.chars}\n{self.points_subs}\n{self.method}")
+                print("QwQ...这里出了点问题? 如有疑问可联系QQ2139223150解决")
+            else:
+                print( ResourceWarning("摸鱼~ (没有生成任何数据, 输入或设置出了问题?)") )
 
     def toText(self):
         return self.dataText
